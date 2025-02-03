@@ -10,8 +10,8 @@ export default class projectManager {
   }
 
   createProject(projTitle) {
-    const project = new Project(projTitle);
-    this.#projects.set(++this.#counter, project);
+    const project = new Project(++this.#counter, projTitle);
+    this.#projects.set(this.#counter, project);
     return this.#counter;
   }
 
@@ -21,5 +21,13 @@ export default class projectManager {
 
   getProjects() {
     return this.#projects;
+  }
+
+  removeProject(projectId) {
+    this.projects = this.projects.filter((project) => project.id !== projectId);
+  }
+
+  removeTaskFromProject(projId, taskId) {
+    this.#projects.get(projId).deleteTask(taskId);
   }
 }

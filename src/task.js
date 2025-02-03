@@ -13,7 +13,7 @@ export default class Task {
   //
   #subTaskCounter = 0;
 
-  constructor(id, title, description, status, priority, dueDate) {
+  constructor(id, title, description, priority, dueDate, status) {
     this.id = id;
     this.title = title;
     this.description = description;
@@ -25,30 +25,30 @@ export default class Task {
     // this.#subTaskCounter = 0;
   }
 
-  // addSubTask(
-  //   taskTitle,
-  //   taskDesc,
-  //   taskStatus,
-  //   taskPriority,
-  //   taskDueDate,
-  //   isSubTask,
-  // ) {
-  //   if (isSubTask) {
-  //     console.log("Cannot create a subtask for a subtask.");
-  //     return;
-  //   }
-  //   const task = new Task(
-  //     this.#subTaskCounter++,
-  //     taskTitle,
-  //     taskDesc,
-  //     taskStatus,
-  //     taskPriority,
-  //     taskDueDate,
-  //     true,
-  //   );
-  //
-  //   this.taskList.push(task);
-  // }
+  /* addSubTask(
+    taskTitle,
+    taskDesc,
+    taskStatus,
+    taskPriority,
+    taskDueDate,
+    isSubTask,
+  ) {
+    if (isSubTask) {
+      console.log("Cannot create a subtask for a subtask.");
+      return;
+    }
+    const task = new Task(
+      this.#subTaskCounter++,
+      taskTitle,
+      taskDesc,
+      taskStatus,
+      taskPriority,
+      taskDueDate,
+      true,
+    );
+
+    this.taskList.push(task);
+  } */
 
   test() {
     console.log(`Task titled ${this.title}`);
