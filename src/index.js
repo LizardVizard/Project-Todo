@@ -1,5 +1,3 @@
-// import Task from "./task.js";
-// import Project from "./project";
 import ProjectManager from "./projectManager";
 import Display from "./display.js";
 import { addDays } from "date-fns";
@@ -7,9 +5,41 @@ import "./style.css";
 
 console.log("Loaded");
 
+const elements = {
+  projectList: document.getElementById("project-list"),
+  taskList: document.getElementById("task-list"),
+};
+
+// TODO:
+// - Tasks:
+//  - show info
+//  - creating
+//  - edit info
+//====
+// - Projects:
+//  - creating
+//  - editing task info
+//  - editing name
+//  - load data from localStorage
+//====
+// - Display:
+//  - add buttons to change info
+//  - make things more readable
+//  - task checkbox, change task status
+//   - when checked strike through text of a task
+//====
+// - localStorage:
+//  - save projects and lists in local storage
+//   - use abstraction to larp using DBs
+
 const manager = new ProjectManager();
+
+// FIX: write a proper function for creating default
+// project(inside projectManager) if none exist
+// this is only for debugging
 let id = manager.createProject("Default");
 
+// FIX: this for debugging as well
 function addTestData() {
   let proj1 = manager.getProjectById(id);
   proj1.addTask({
@@ -38,33 +68,10 @@ function addTestData() {
   });
   return { proj1, proj2 };
 }
-// proj2.addTask("test", "test1", null, null, null, null);
 
 const { proj1, proj2 } = addTestData();
 console.log(proj1);
 console.log(proj2);
 
-Display.displayProjects(manager.getProjects());
-Display.displayTasks(proj1);
-
-// const project = new Project("Default");
-// project.addTask(
-//   "Make a todo list app",
-//   "- plan how to make an app \n- make the app\n- complete",
-//   null,
-//   null,
-//   null,
-//   null,
-// );
-// project.addTask("Learn JS", "", null, null, null, null);
-// // console.log(project.taskList[0]);
-// console.log(project.getTaskList());
-// project.removeTask(0);
-// console.log(project.getTaskList());
-//
-// const project1 = new Project("Default");
-// project1.addTask("test", "test1", null, null, null, null);
-// console.log(project1.getTaskList());
-
-// const task = new Task("Make a Todo project");
-// task.test();
+const displayManager = new Display(manager, elements);
+displayManager.initialShow();

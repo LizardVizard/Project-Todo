@@ -1,28 +1,37 @@
 export default class Display {
-  static elements = {
-    // projectList: "project-list",
-    projectList: document.getElementById("project-list"),
-    taskList: document.getElementById("task-list"),
-    // taskList: "task-list",
-  };
+  constructor(projectManager, elements) {
+    this.projectManager = projectManager;
+    this.elements = elements;
+  }
 
-  static displayProjects(projects) {
-    this.elements.projectList.innerHTML = "";
+  createProjectElement(project) {
+    const projElem = document.createElement("div");
+    projElem.classList.add("project");
+    projElem.setAttribute("data-project-id", project.id);
 
-    projects.forEach((project) => {
-      const projElem = document.createElement("div");
-      projElem.classList.add("project");
-      projElem.setAttribute("data-project-id", project.id);
-
-      // FIX: onclick function
-      projElem.innerHTML = `
+    // HTML for project element
+    projElem.innerHTML = `
+        <span>Tasks:${project.getTaskList().length}</span>
         <span>${project.title}</span>
-        <button onclick="manager.removeProject(${project.id})">
       `;
 
-      this.elements.projectList.append(projElem);
-    });
+    const projDeleteButton = this.createProjectDeleteButton(project.id);
+    projElem.append(projDeleteButton);
 
+    return projElem;
+  }
+
+  createProjectDeleteButton(projectId) {
+    // Create a button with event listener to delete a project
+    const projDeleteButton = document.createElement("button");
+    projDeleteButton.addEventListener("click", () => {
+      this.projectManager.deleteProject(projectId);
+      this.displayProjects();
+    });
+    return projDeleteButton;
+  }
+
+  createNewProjectElement() {
     const newProj = document.createElement("div");
     const input = document.createElement("input");
     const butt = document.createElement("button");
@@ -33,20 +42,62 @@ export default class Display {
     newProj.append(input);
     newProj.append(butt);
 
-    this.elements.projectList.append(newProj);
+    return newProj;
   }
 
-  static displayTasks(project) {
-    this.elements.taskList.innerHTML = "";
-    project.getTaskList().forEach((task) => {
-      const taskElem = document.createElement("div");
-      taskElem.classList.add("task");
-      taskElem.setAttribute("data-task-id", task.id);
+  displayProjects() {
+    // Get list of projects
+    const projects = this.projectManager.getProjects();
 
-      taskElem.innerHTML = `
-        <span>${task.title}</span>
-      `;
+    // Reset elements of projects in the sidebar
+    this.elements.projectList.innerHTML = "";
+
+    // For each project in projectManager create an element
+    // to show in the sidebar
+    projects.forEach((project) => {
+      const projectElement = this.createProjectElement(project);
+      this.elements.projectList.append(projectElement);
+    });
+
+    // Make a button for creating new project
+    const newProjectElement = this.createNewProjectElement();
+    this.elements.projectList.append(newProjectElement);
+  }
+
+  displayTasks(project) {
+    // Reset tasks display
+    this.elements.taskList.innerHTML = "";
+
+    const tasks = project.getTaskList();
+    tasks.forEach((task) => {
+      const taskElem = this.createTaskElement(task);
       this.elements.taskList.append(taskElem);
     });
+  }
+
+  createTaskElement(task) {
+    const taskElem = document.createElement("div");
+    taskElem.classList.add("task");
+    taskElem.setAttribute("data-task-id", task.id);
+
+    taskElem.innerHTML = `
+        <span>${task.title}</span>
+      `;
+    return taskElem;
+  }
+
+  initialShow() {
+    // defaultProjectId is initialized as NULL, no preference yet
+    const defaultProjectId = this.projectManager.defaultProjectId;
+    const preferredProject =
+      this.projectManager.getProjectById(defaultProjectId);
+
+    // if no default project found then show the first one in the map
+    const defaultProject =
+      preferredProject ||
+      this.projectManager.getProjects().values().next().value;
+
+    this.displayProjects();
+    this.displayTasks(defaultProject);
   }
 }

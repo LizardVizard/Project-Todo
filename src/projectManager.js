@@ -7,6 +7,7 @@ export default class projectManager {
   constructor() {
     this.#projects = new Map();
     this.#counter = 0;
+    this.defaultProjectId = null;
   }
 
   createProject(projTitle) {
@@ -23,11 +24,27 @@ export default class projectManager {
     return this.#projects;
   }
 
-  removeProject(projectId) {
-    this.projects = this.projects.filter((project) => project.id !== projectId);
+  deleteProject(projectId) {
+    // WARNING: remove console log for prod
+    return (
+      this.#projects.delete(projectId) &&
+      console.log(`project with id(${projectId}) was deleted`)
+    );
   }
 
-  removeTaskFromProject(projId, taskId) {
+  deleteTaskFromProject(projId, taskId) {
     this.#projects.get(projId).deleteTask(taskId);
+  }
+
+  changeDefaultProject(projId) {
+    if (this.getProjectById(projId)) {
+      this.defaultProjectId = projId;
+    } else {
+      // WARNING: remove console log for prod
+      console.log(
+        `no project found with id(${projId}) during change of default project`,
+      );
+      this.defaultProjectId = null;
+    }
   }
 }
