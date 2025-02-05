@@ -31,6 +31,9 @@ const elements = {
 // - localStorage:
 //  - save projects and lists in local storage
 //   - use abstraction to larp using DBs
+//====
+// - SASS
+//
 
 const manager = new ProjectManager();
 

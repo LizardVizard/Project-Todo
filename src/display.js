@@ -31,16 +31,35 @@ export default class Display {
     return projDeleteButton;
   }
 
-  createNewProjectElement() {
+  createProjectCreationElement() {
     const newProj = document.createElement("div");
+
+    const form = document.createElement("form");
     const input = document.createElement("input");
     const butt = document.createElement("button");
 
     // TODO: Connect button to a projectManager project creation function
     // using input field text as title and switch to it.
 
-    newProj.append(input);
-    newProj.append(butt);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = input.value;
+      const projectId = this.projectManager.createProject(name);
+
+      if (projectId !== undefined) {
+        // WARNING: console log for debugging
+        console.log(`project with id(${projectId}) was created`);
+        this.displayProjects();
+      } else {
+        console.log(`project with id(${projectId}) failed to create`);
+      }
+    });
+
+    form.append(input);
+    form.append(butt);
+
+    newProj.append(form);
 
     return newProj;
   }
@@ -60,7 +79,7 @@ export default class Display {
     });
 
     // Make a button for creating new project
-    const newProjectElement = this.createNewProjectElement();
+    const newProjectElement = this.createProjectCreationElement();
     this.elements.projectList.append(newProjectElement);
   }
 

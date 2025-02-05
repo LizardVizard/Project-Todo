@@ -1,4 +1,5 @@
 import Project from "./project";
+import Validator from "./validator";
 
 export default class projectManager {
   #projects;
@@ -11,9 +12,15 @@ export default class projectManager {
   }
 
   createProject(projTitle) {
-    const project = new Project(++this.#counter, projTitle);
-    this.#projects.set(this.#counter, project);
-    return this.#counter;
+    const validatedTitle = Validator.validateProjectTitle(projTitle);
+
+    if (typeof validatedTitle === "string") {
+      const project = new Project(++this.#counter, validatedTitle);
+      this.#projects.set(this.#counter, project);
+      return this.#counter;
+    } else {
+      return;
+    }
   }
 
   getProjectById(projId) {
