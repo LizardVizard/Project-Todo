@@ -12,27 +12,26 @@ const elements = {
 
 // TODO:
 // - Tasks:
-//  - show info
 //  - creating
 //  - edit info
+//  - task checkbox, change task status
+//   - when checked strike through text of a task
 //====
 // - Projects:
-//  - creating
-//  - editing task info
 //  - editing name
-//  - load data from localStorage
 //====
 // - Display:
 //  - add buttons to change info
 //  - make things more readable
-//  - task checkbox, change task status
-//   - when checked strike through text of a task
 //====
 // - localStorage:
 //  - save projects and lists in local storage
 //   - use abstraction to larp using DBs
 //====
-// - SASS
+// - ? SASS
+//====
+// - Check all  FIX:
+//        and   WARNING:
 //
 
 const manager = new ProjectManager();
@@ -49,7 +48,7 @@ function addTestData() {
     title: "Make a todo list app",
     description: "- plan how to make an app \n- make the app\n- complete",
     priority: "High",
-    dueDate: addDays(Date.now(), 14),
+    dueDate: addDays(new Date(), 14),
     status: null,
   });
   proj1.addTask({

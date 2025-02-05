@@ -1,3 +1,5 @@
+import { format, formatDistance, formatRelative, subDays } from "date-fns";
+
 export default class Display {
   constructor(projectManager, elements) {
     this.projectManager = projectManager;
@@ -5,9 +7,16 @@ export default class Display {
   }
 
   createProjectElement(project) {
+    const projContainer = document.createElement("div");
+    projContainer.classList.add("project-container");
     const projElem = document.createElement("div");
     projElem.classList.add("project");
     projElem.setAttribute("data-project-id", project.id);
+
+    projElem.addEventListener("click", () => {
+      console.log("click", project.id);
+      this.displayTasks(project);
+    });
 
     // HTML for project element
     projElem.innerHTML = `
@@ -15,31 +24,37 @@ export default class Display {
         <span>${project.title}</span>
       `;
 
-    const projDeleteButton = this.createProjectDeleteButton(project.id);
-    projElem.append(projDeleteButton);
+    const projDeleteButton = this.createProjectDeleteButton(project);
+    // projElem.append(projDeleteButton);
+    projContainer.append(projElem);
+    projContainer.append(projDeleteButton);
 
-    return projElem;
+    // return projElem;
+    return projContainer;
   }
 
-  createProjectDeleteButton(projectId) {
+  createProjectDeleteButton(project) {
     // Create a button with event listener to delete a project
     const projDeleteButton = document.createElement("button");
+    projDeleteButton.innerHTML = "X";
     projDeleteButton.addEventListener("click", () => {
-      this.projectManager.deleteProject(projectId);
-      this.displayProjects();
+      if (confirm(`Are you sure you want to delete ${project.title} ?`)) {
+        this.projectManager.deleteProject(project.id);
+        this.displayProjects();
+      }
     });
     return projDeleteButton;
   }
 
   createProjectCreationElement() {
     const newProj = document.createElement("div");
+    newProj.classList.add("project-create");
 
     const form = document.createElement("form");
     const input = document.createElement("input");
     const butt = document.createElement("button");
-
-    // TODO: Connect button to a projectManager project creation function
-    // using input field text as title and switch to it.
+    butt.innerHTML = "Create";
+    // butt.classList.add("project-create-butt");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -52,7 +67,7 @@ export default class Display {
         console.log(`project with id(${projectId}) was created`);
         this.displayProjects();
       } else {
-        console.log(`project with id(${projectId}) failed to create`);
+        console.log(`project failed to create`);
       }
     });
 
@@ -95,6 +110,9 @@ export default class Display {
   }
 
   createTaskElement(task) {
+    const taskContainer = document.createElement("div");
+    taskContainer.classList.add("task-container");
+
     const taskElem = document.createElement("div");
     taskElem.classList.add("task");
     taskElem.setAttribute("data-task-id", task.id);
@@ -102,7 +120,49 @@ export default class Display {
     taskElem.innerHTML = `
         <span>${task.title}</span>
       `;
-    return taskElem;
+
+    const taskInfo = this.createTaskInfoElement(task);
+    taskElem.addEventListener("click", () => {
+      const state = taskInfo.style.display;
+      if (state === "none") {
+        taskInfo.style.display = "block";
+      } else {
+        taskInfo.style.display = "none";
+      }
+    });
+
+    taskContainer.append(taskElem);
+    taskContainer.append(taskInfo);
+
+    return taskContainer;
+  }
+
+  createTaskInfoElement(task) {
+    const taskInfo = document.createElement("div");
+    taskInfo.classList.add("task-info");
+    taskInfo.style.display = "none";
+
+    const list = document.createElement("ul");
+    for (const field in task) {
+      // FIX: better check for field info is needed
+      if (
+        field !== "id" &&
+        field !== "title" &&
+        task[field] !== null &&
+        task[field] !== ""
+      ) {
+        const item = document.createElement("li");
+        if (field === "dueDate") {
+          item.innerText = format(task[field], "do MMMM yyyy");
+        } else {
+          item.innerText = task[field];
+        }
+        list.append(item);
+      }
+    }
+    taskInfo.append(list);
+
+    return taskInfo;
   }
 
   initialShow() {

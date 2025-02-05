@@ -3,6 +3,14 @@ body {
   margin: 0;
 }
 
+#logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* text-align: center; */
+  /* vertical-align: middle; */
+}
+
 .container {
   display: grid;
   grid-template-rows: minmax(150px, auto) 1fr;
@@ -13,4 +21,109 @@ body {
 #task-list {
   grid-column: 2/3;
   grid-row: 1/-1;
+  display: flex;
+  flex-direction: column;
 }
+
+.project-container {
+  display: flex;
+  justify-items: center;
+  align-items: center;
+}
+
+.project {
+  background: #ddd;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.project:hover {
+  background: #bbb;
+}
+.project-create > form {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+}
+.project-create > form > input {
+  /* flex: 1; */
+  margin: 5px 10px;
+  width: 100%;
+}
+
+/* TODO: add hover for project create button*/
+.project-create button {
+  vertical-align: middle;
+  width: 80px;
+  height: 30px;
+  background-color: white;
+  border-width: 1px;
+  color: lightblue;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 0px;
+  border-radius: 5px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.project-container button {
+  vertical-align: middle;
+  width: 50px;
+  height: 30px;
+  background-color: white;
+  border-width: 1px;
+  color: #d9534f;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.project-container button:hover {
+  background: #cc0000;
+  color: white;
+}
+
+.task-container {
+  margin: 15px;
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* align-items: center; */
+  /* flex: 1; */
+}
+
+.task-container > * {
+  padding: 20px;
+}
+
+.task {
+  border-radius: 10px;
+  background-color: lightgray;
+  transition: ease 02ms;
+  align-items: center;
+}
+
+.task:hover {
+  background-color: gray;
+}
+.task-info {
+  margin-left: 15px;
+  margin-right: 8px;
+  border: 2px solid darkgray;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+
+/* ul { */
+/*   padding: 0; */
+/* } */
