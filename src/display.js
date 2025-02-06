@@ -107,6 +107,8 @@ export default class Display {
       const taskElem = this.createTaskElement(task);
       this.elements.taskList.append(taskElem);
     });
+    const taskCreateButton = this.createTaskCreationElement();
+    this.elements.taskList.append(taskCreateButton);
   }
 
   createTaskElement(task) {
@@ -117,10 +119,29 @@ export default class Display {
     taskElem.classList.add("task");
     taskElem.setAttribute("data-task-id", task.id);
 
-    taskElem.innerHTML = `
+    // Priority indicator
+    const taskPrio = document.createElement("div");
+    taskPrio.classList.add("task-priority");
+
+    switch (task.priority) {
+      case "High":
+        taskPrio.classList.add("high-priority");
+        break;
+      case "Medium":
+        taskPrio.classList.add("medium-priority");
+        break;
+
+      default:
+        break;
+    }
+    taskElem.append(taskPrio);
+
+    // Task title
+    taskElem.innerHTML += `
         <span>${task.title}</span>
       `;
 
+    // Task info div
     const taskInfo = this.createTaskInfoElement(task);
     taskElem.addEventListener("click", () => {
       const state = taskInfo.style.display;
@@ -163,6 +184,14 @@ export default class Display {
     taskInfo.append(list);
 
     return taskInfo;
+  }
+
+  createTaskCreationElement() {
+    const taskCreateButton = document.createElement("div");
+    taskCreateButton.classList.add("task-creation");
+    taskCreateButton.innerHTML = "Create new task";
+
+    return taskCreateButton;
   }
 
   initialShow() {
