@@ -1,4 +1,15 @@
 import { format, formatDistance, formatRelative, subDays } from "date-fns";
+import Task from "./task";
+
+const fieldTypes = {
+  dueDate: "date",
+  status: "checkbox",
+  priority: "select",
+};
+
+const fields = Object.keys(new Task()).filter(
+  (field) => field != "id" && field != "",
+);
 
 export default class Display {
   constructor(projectManager, elements) {
@@ -16,6 +27,8 @@ export default class Display {
     projElem.addEventListener("click", () => {
       console.log("click", project.id);
       this.displayTasks(project);
+      // this.displayProjects();
+      // projElem.style.border = "2px solid black";
     });
 
     // HTML for project element
@@ -107,7 +120,7 @@ export default class Display {
       const taskElem = this.createTaskElement(task);
       this.elements.taskList.append(taskElem);
     });
-    const taskCreateButton = this.createTaskCreationElement();
+    const taskCreateButton = this.createTaskCreationElement(project);
     this.elements.taskList.append(taskCreateButton);
   }
 
@@ -122,31 +135,43 @@ export default class Display {
     // Priority indicator
     const taskPrio = document.createElement("div");
     taskPrio.classList.add("task-priority");
+    taskPrio.title = `Priority: ${task.priority}`;
 
-    switch (task.priority) {
-      case "High":
+    taskPrio.classList.add(`${task.priority}-priority`);
+    /* switch (task.priority) {
+      case "high":
         taskPrio.classList.add("high-priority");
         break;
-      case "Medium":
+      case "medium":
         taskPrio.classList.add("medium-priority");
         break;
 
+      case "low":
+        taskPrio.classList.add("low-priority");
+        break;
       default:
         break;
-    }
+    } */
     taskElem.append(taskPrio);
+    const title = document.createElement("span");
+    title.innerText = task.title;
+    taskElem.append(title);
 
     // Task title
-    taskElem.innerHTML += `
-        <span>${task.title}</span>
-      `;
+    // taskElem.innerHTML += `
+    //     <span>${task.title}</span>
+    //   `;
+    if (task.status) {
+      // title.style.textDecoration = "line-through";
+      taskElem.classList.add("task-completed");
+    }
 
     // Task info div
     const taskInfo = this.createTaskInfoElement(task);
     taskElem.addEventListener("click", () => {
       const state = taskInfo.style.display;
       if (state === "none") {
-        taskInfo.style.display = "block";
+        taskInfo.style.display = "flex";
       } else {
         taskInfo.style.display = "none";
       }
@@ -163,36 +188,179 @@ export default class Display {
     taskInfo.classList.add("task-info");
     taskInfo.style.display = "none";
 
-    const list = document.createElement("ul");
+    // const list = document.createElement("ul");
     for (const field in task) {
+      const taskInfoField = document.createElement("div");
+      taskInfoField.classList.add("task-info-field");
+      console.log(field, task[field]);
       // FIX: better check for field info is needed
       if (
         field !== "id" &&
         field !== "title" &&
+        field !== "priority" &&
+        field !== "status" &&
         task[field] !== null &&
+        task[field] !== undefined &&
         task[field] !== ""
       ) {
-        const item = document.createElement("li");
+        // const item = document.createElement("li");
+        const label = document.createElement("label");
+        label.innerText = field;
+
+        const info = document.createElement("div");
         if (field === "dueDate") {
-          item.innerText = format(task[field], "do MMMM yyyy");
+          // taskInfoField.append(label, format(task[field], "do MMMM yyyy"));
+          info.innerText = format(task[field], "do MMMM yyyy");
         } else {
-          item.innerText = task[field];
+          info.innerText = task[field];
         }
-        list.append(item);
+        taskInfoField.append(label, info);
+        // list.append(item);
+        taskInfo.append(taskInfoField);
       }
     }
-    taskInfo.append(list);
 
     return taskInfo;
   }
 
-  createTaskCreationElement() {
+  createTaskCreationElement(project) {
     const taskCreateButton = document.createElement("div");
     taskCreateButton.classList.add("task-creation");
     taskCreateButton.innerHTML = "Create new task";
 
+    // WARNING: TEST data
+    //
+    /* const testData = {
+      title: "TODO make a form for task data",
+      priority: "Medium",
+      dueDate: undefined,
+      description: undefined,
+      status: false,
+    }; */
+    // const popUp = this.createPopUp();
+    // popUpContainer.append(popUp);
+
+    const popUp = document.createElement("div");
+    popUp.classList.add("popup");
+    this.elements.taskList.append(popUp);
+
+    const form = document.createElement("form");
+    form.classList.add("form-container");
+
+    for (const field of fields) {
+      const fieldElem = document.createElement("div");
+      fieldElem.classList.add("form-field");
+      const label = document.createElement("label");
+      label.textContent = field;
+      label.setAttribute("for", field);
+
+      let input;
+
+      if (field === "priority") {
+        input = document.createElement("select");
+        // for (const prio in Task.PRIORITIES) {
+        Task.PRIORITIES.forEach((priority) => {
+          const option = document.createElement("option");
+          option.value = priority;
+          option.innerText = priority;
+          input.append(option);
+        });
+      } else if (field === "description") {
+        input = document.createElement("textarea");
+      } else {
+        input = document.createElement("input");
+        input.setAttribute("type", fieldTypes[field] || "text");
+      }
+      input.setAttribute("id", field);
+      input.setAttribute("name", field);
+
+      if (field === "title") {
+        input.setAttribute("required", "");
+      }
+
+      fieldElem.append(label, input);
+
+      form.append(fieldElem);
+    }
+    const errorText = document.createElement("div");
+    errorText.classList.add("error-text");
+
+    form.append(errorText);
+
+    const sendFormButt = document.createElement("button");
+    sendFormButt.innerText = "Create New Task";
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      errorText.innerText = "";
+      errorText.style.display = "none";
+
+      const title = document.getElementById("title");
+      const titleTrimmed = title.value.trim();
+      if (titleTrimmed) {
+        title.value = titleTrimmed;
+      } else {
+        errorText.innerText += "Title should not be empty";
+        // title.focus();
+      }
+
+      if (errorText.innerText !== "") {
+        errorText.style.display = "block";
+        return false;
+      }
+
+      //
+      // FIX: submit reloads the page, so data gets reset
+      const taskData = {};
+      for (const field of fields) {
+        const inputField = document.getElementById(field);
+        console.log(inputField, inputField.value);
+        if (inputField) {
+          if (inputField.type === "checkbox") {
+            taskData[field] = inputField.checked;
+          } else {
+            taskData[field] = inputField.value;
+          }
+        }
+      }
+
+      project.addTask(taskData);
+      // console.log(project.getTaskList());
+      this.displayTasks(project);
+    });
+
+    form.append(sendFormButt);
+    // form.append(field);
+    // form.append(field);
+
+    popUp.append(form);
+    // console.log(taskData);
+
+    taskCreateButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      popUp.style.display = "block";
+      // this.projectManager.
+      // this.showPopUp(popUp);
+      // this.projectManager.getProjectById(project.id).addTask(testData);
+      // this.displayTasks(project);
+    });
+
     return taskCreateButton;
   }
+
+  // createPopUp() {
+  //   // const popUpContainer = document.createElement("div");
+  //   // popUpContainer.classList.add("popup-container");
+  //   // popUpContainer.append(popUp);
+  //
+  //   return popUp;
+  // }
+  //
+  // showPopUp(popUp) {
+  //   popUp.style.color = "red";
+  //   console.log("show");
+  // }
 
   initialShow() {
     // defaultProjectId is initialized as NULL, no preference yet

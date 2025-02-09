@@ -12,17 +12,14 @@ const elements = {
 
 // TODO:
 // - Tasks:
-//  - creating
 //  - edit info
 //  - task checkbox, change task status
-//   - when checked strike through text of a task
 //====
 // - Projects:
 //  - editing name
 //====
 // - Display:
 //  - add buttons to change info
-//  - make things more readable
 //====
 // - localStorage:
 //  - save projects and lists in local storage
@@ -47,16 +44,16 @@ function addTestData() {
   proj1.addTask({
     title: "Make a todo list app",
     description: "- plan how to make an app \n- make the app\n- complete",
-    priority: "High",
+    priority: "high",
     dueDate: addDays(new Date(), 14),
-    status: null,
+    // status: null,
   });
   proj1.addTask({
     title: "Learn JS",
     description: "",
     priority: "",
     dueDate: null,
-    status: null,
+    // status: null,
   });
 
   id = manager.createProject("TestProject");
@@ -66,7 +63,7 @@ function addTestData() {
     description: "test1",
     priority: "",
     dueDate: null,
-    status: null,
+    // status: null,
   });
   return { proj1, proj2 };
 }

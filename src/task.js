@@ -11,20 +11,44 @@ export default class Task {
   // Methods:
   //  - setters/getters
   //
-  #subTaskCounter = 0;
 
-  constructor(id, title, description, priority, dueDate, status) {
+  // #subTaskCounter = 0;
+
+  static PRIORITIES = ["low", "medium", "high"];
+
+  constructor(
+    id,
+    title,
+    description = "",
+    dueDate = undefined,
+    status = false,
+    priority = "low",
+  ) {
     this.id = id;
     this.title = title;
     this.description = description;
-    this.priority = priority;
     this.dueDate = dueDate;
     this.status = status;
+    this.priority = Task.PRIORITIES.includes(priority) ? priority : "low";
     // this.isSubTask = isSubTask;
     // this.subTasks = [];
     // this.#subTaskCounter = 0;
   }
 
+  // updateTask(taskData) {
+  //   const { title, description, priority, dueDate, status } = taskData;
+  //
+  //   // TODO: Validation, again, I'm not actually going to do this
+  //
+  //   // if (title !== undefined) task.title = title;
+  //   // if (description !== undefined) task.description = description;
+  //   // if (priority !== undefined) task.priority = priority;
+  //   // if (dueDate !== undefined) task.dueDate = dueDate;
+  //   // if (status !== undefined) task.status = status;
+  //   //
+  //   // return task;
+  //   // Object.assign
+  // }
   /* addSubTask(
     taskTitle,
     taskDesc,
