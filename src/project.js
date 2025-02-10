@@ -55,6 +55,16 @@ export default class Project {
   getTaskList() {
     return this.taskList;
   }
+  fromJSON(data) {
+    // console.log("JSON", data);
+    const project = new Project(-1, data.title);
+
+    if (Array.isArray(data.taskList)) {
+      data.taskList.forEach((taskData) => project.addTask(taskData));
+    }
+
+    return project;
+  }
   // get taskList() {
   //   return this.taskList;
   // }

@@ -17,9 +17,20 @@ export default class projectManager {
     if (typeof validatedTitle === "string") {
       const project = new Project(++this.#counter, validatedTitle);
       this.#projects.set(this.#counter, project);
+      this.saveProject(project);
       return this.#counter;
     } else {
       return;
+    }
+  }
+
+  createProjectFromJSON(data) {
+    const projectId = this.createProject(data.title);
+
+    if (Array.isArray(data.taskList)) {
+      data.taskList.forEach((taskData) =>
+        this.createTaskForProject(projectId, taskData),
+      );
     }
   }
 
@@ -39,6 +50,15 @@ export default class projectManager {
     );
   }
 
+  createTaskForProject(projId, taskData) {
+    const project = this.#projects.get(projId);
+
+    if (project) {
+      project.addTask(taskData);
+      this.saveProject(project);
+    }
+  }
+
   deleteTaskFromProject(projId, taskId) {
     this.#projects.get(projId).deleteTask(taskId);
   }
@@ -53,5 +73,36 @@ export default class projectManager {
       );
       this.defaultProjectId = null;
     }
+  }
+
+  saveProject(proj) {
+    const projectIdListJSON = localStorage.getItem("project_ids");
+    // console.log(projectIdListJSON);
+    let projectIdList;
+    if (projectIdListJSON === null) {
+      projectIdList = new Set();
+    } else {
+      projectIdList = new Set(Array.from(JSON.parse(projectIdListJSON)));
+    }
+    // console.log(projectIdList);
+    projectIdList.add(proj.id);
+    const projectIdArray = Array.from(projectIdList);
+
+    // console.log(projectIdList);
+    localStorage.setItem(`project_ids`, JSON.stringify(projectIdArray));
+    localStorage.setItem(`project-${proj.id}`, JSON.stringify(proj));
+  }
+
+  loadProjects() {
+    const projectIdListJSON = localStorage.getItem("project_ids");
+    const projectIdList = JSON.parse(projectIdListJSON);
+    console.log(projectIdList);
+
+    projectIdList.forEach((projId) => {
+      const projJSON = localStorage.getItem(`project-${projId}`);
+      const projData = JSON.parse(projJSON);
+
+      this.createProjectFromJSON(projData);
+    });
   }
 }

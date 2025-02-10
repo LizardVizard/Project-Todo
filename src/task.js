@@ -74,6 +74,17 @@ export default class Task {
     this.taskList.push(task);
   } */
 
+  // toJSON() {
+  //   return {
+  //     id: this.id,
+  //     title: this.title,
+  //     description: this.description,
+  //     dueDate: this.dueDate,
+  //     status: this.status,
+  //     priority: this.priority,
+  //   };
+  // }
+
   test() {
     console.log(`Task titled ${this.title}`);
   }

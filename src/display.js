@@ -1,5 +1,6 @@
 import { format, formatDistance, formatRelative, subDays } from "date-fns";
 import Task from "./task";
+import projectManager from "./projectManager";
 
 const fieldTypes = {
   dueDate: "date",
@@ -192,7 +193,7 @@ export default class Display {
     for (const field in task) {
       const taskInfoField = document.createElement("div");
       taskInfoField.classList.add("task-info-field");
-      console.log(field, task[field]);
+      // console.log(field, task[field]);
       // FIX: better check for field info is needed
       if (
         field !== "id" &&
@@ -325,7 +326,8 @@ export default class Display {
         }
       }
 
-      project.addTask(taskData);
+      // project.addTask(taskData);
+      this.projectManager.createTaskForProject(project.id, taskData);
       // console.log(project.getTaskList());
       this.displayTasks(project);
     });
