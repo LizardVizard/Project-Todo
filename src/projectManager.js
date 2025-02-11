@@ -8,7 +8,10 @@ export default class projectManager {
   constructor() {
     this.#projects = new Map();
     this.#counter = 0;
-    this.defaultProjectId = null;
+    const defaultProjectIdFromStorage = JSON.parse(
+      localStorage.getItem("default-project"),
+    );
+    this.defaultProjectId = defaultProjectIdFromStorage || 1;
   }
 
   createProject(projTitle) {
@@ -20,6 +23,7 @@ export default class projectManager {
       this.saveProject(project);
       return this.#counter;
     } else {
+      console.log("Project title failed validation");
       return;
     }
   }
@@ -44,10 +48,21 @@ export default class projectManager {
 
   deleteProject(projectId) {
     // WARNING: remove console log for prod
-    return (
-      this.#projects.delete(projectId) &&
-      console.log(`project with id(${projectId}) was deleted`)
-    );
+    const projectIdListJSON = localStorage.getItem("project_ids");
+
+    let projectIdList = new Set(Array.from(JSON.parse(projectIdListJSON)));
+    if (projectIdList.delete(projectId)) {
+      const projectIdArray = Array.from(projectIdList);
+      localStorage.setItem(`project_ids`, JSON.stringify(projectIdArray));
+      localStorage.removeItem(`project-${projectId}`);
+
+      return (
+        this.#projects.delete(projectId) &&
+        console.log(`project with id(${projectId}) was deleted`)
+      );
+    } else {
+      console.log(`Project with id(${projectId}) not found in project list`);
+    }
   }
 
   createTaskForProject(projId, taskData) {
@@ -66,12 +81,14 @@ export default class projectManager {
   changeDefaultProject(projId) {
     if (this.getProjectById(projId)) {
       this.defaultProjectId = projId;
+      localStorage.setItem("default-project", projId);
     } else {
       // WARNING: remove console log for prod
       console.log(
         `no project found with id(${projId}) during change of default project`,
       );
       this.defaultProjectId = null;
+      localStorage.setItem("default-project", "null");
     }
   }
 

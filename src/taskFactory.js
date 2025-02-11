@@ -16,7 +16,7 @@ export default class TaskFactory {
 
     if (title !== undefined) task.title = title;
     if (description !== undefined) task.description = description;
-    if (dueDate !== undefined) task.dueDate = dueDate;
+    if (dueDate !== undefined) task.dueDate = new Date(dueDate);
     if (status !== undefined) task.status = status;
     if (priority !== undefined) task.priority = priority;
 

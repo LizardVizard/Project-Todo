@@ -1,6 +1,5 @@
-import { format, formatDistance, formatRelative, subDays } from "date-fns";
+import { format, differenceInDays, isDate } from "date-fns";
 import Task from "./task";
-import projectManager from "./projectManager";
 
 const fieldTypes = {
   dueDate: "date",
@@ -26,24 +25,37 @@ export default class Display {
     projElem.setAttribute("data-project-id", project.id);
 
     projElem.addEventListener("click", () => {
-      console.log("click", project.id);
+      // console.log("click", project.id);
       this.displayTasks(project);
-      // this.displayProjects();
-      // projElem.style.border = "2px solid black";
     });
 
+    const defaultProject = this.projectManager.defaultProjectId;
+    //     let defaultProjectId
+    //     if (defaultProject === null) {
+    // // defaultProjectId
+    //     }
     // HTML for project element
-    projElem.innerHTML = `
-        <span>Tasks:${project.getTaskList().length}</span>
-        <span>${project.title}</span>
-      `;
+    const isDefaultProjectSpan = document.createElement("div");
+    isDefaultProjectSpan.classList.add("default-project");
+    isDefaultProjectSpan.innerText = project.id === defaultProject ? "*" : " ";
+    isDefaultProjectSpan.addEventListener("click", () => {
+      this.projectManager.changeDefaultProject(project.id);
+      this.displayProjects();
+      // this
+    });
+
+    const projectTitle = document.createElement("div");
+    projectTitle.innerText = `${project.title}`;
+    projElem.append(isDefaultProjectSpan, projectTitle);
+    // projElem.innerHTML = `
+    //     <span>Tasks:${project.id === defaultProject}</span>
+    //     <span>${project.title}</span>
+    //   `;
 
     const projDeleteButton = this.createProjectDeleteButton(project);
-    // projElem.append(projDeleteButton);
     projContainer.append(projElem);
     projContainer.append(projDeleteButton);
 
-    // return projElem;
     return projContainer;
   }
 
@@ -68,7 +80,6 @@ export default class Display {
     const input = document.createElement("input");
     const butt = document.createElement("button");
     butt.innerHTML = "Create";
-    // butt.classList.add("project-create-butt");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -79,14 +90,13 @@ export default class Display {
       if (projectId !== undefined) {
         // WARNING: console log for debugging
         console.log(`project with id(${projectId}) was created`);
-        this.displayProjects();
+        this.displayProjects(projectId);
       } else {
         console.log(`project failed to create`);
       }
     });
 
-    form.append(input);
-    form.append(butt);
+    form.append(input, butt);
 
     newProj.append(form);
 
@@ -97,11 +107,11 @@ export default class Display {
     // Get list of projects
     const projects = this.projectManager.getProjects();
 
-    // Reset elements of projects in the sidebar
+    // Reset projects list display
     this.elements.projectList.innerHTML = "";
 
     // For each project in projectManager create an element
-    // to show in the sidebar
+    // to show it in the sidebar
     projects.forEach((project) => {
       const projectElement = this.createProjectElement(project);
       this.elements.projectList.append(projectElement);
@@ -113,19 +123,18 @@ export default class Display {
   }
 
   displayTasks(project) {
-    // Reset tasks display
     this.elements.taskList.innerHTML = "";
 
     const tasks = project.getTaskList();
     tasks.forEach((task) => {
-      const taskElem = this.createTaskElement(task);
+      const taskElem = this.createTaskElement(task, project);
       this.elements.taskList.append(taskElem);
     });
     const taskCreateButton = this.createTaskCreationElement(project);
     this.elements.taskList.append(taskCreateButton);
   }
 
-  createTaskElement(task) {
+  createTaskElement(task, project) {
     const taskContainer = document.createElement("div");
     taskContainer.classList.add("task-container");
 
@@ -133,12 +142,52 @@ export default class Display {
     taskElem.classList.add("task");
     taskElem.setAttribute("data-task-id", task.id);
 
+    // console.log(isDate(task.dueDate));
+    // console.log(task.dueData instanceof Date);
+    console.log(task.dueDate);
+    console.log(new Date(task.dueDate));
+
+    // console.log(differenceInDays(task.dueDate, new Date()));
+    if (task.dueDate !== null) {
+      // console.log("is date");
+      const difference = differenceInDays(new Date(task.dueDate), new Date());
+      // console.log(difference);
+      switch (true) {
+        case difference < 0:
+          taskElem.classList.add("already-due");
+          break;
+
+        case difference <= 7:
+          taskElem.classList.add("soon-due");
+          break;
+      }
+    }
+
     // Priority indicator
     const taskPrio = document.createElement("div");
     taskPrio.classList.add("task-priority");
     taskPrio.title = `Priority: ${task.priority}`;
 
+    const checkmark = document.createElement("span");
+    checkmark.innerText = "✔";
+    checkmark.classList.add("checkmark");
+
+    if (task.status) {
+      checkmark.style.display = "block";
+      taskElem.classList.remove("already-due");
+      taskElem.classList.remove("soon-due");
+    } else {
+      checkmark.style.display = "none";
+    }
+
+    taskPrio.append(checkmark);
+
     taskPrio.classList.add(`${task.priority}-priority`);
+    taskPrio.addEventListener("click", () => {
+      task.changeStatus();
+      this.projectManager.saveProject(project);
+      this.displayTasks(project);
+    });
     /* switch (task.priority) {
       case "high":
         taskPrio.classList.add("high-priority");
@@ -153,22 +202,29 @@ export default class Display {
       default:
         break;
     } */
-    taskElem.append(taskPrio);
     const title = document.createElement("span");
     title.innerText = task.title;
-    taskElem.append(title);
 
-    // Task title
-    // taskElem.innerHTML += `
-    //     <span>${task.title}</span>
-    //   `;
+    const deleteTaskButton = document.createElement("button");
+    deleteTaskButton.innerText = "Delete task";
+    deleteTaskButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (confirm(`Are you sure you want to delete task ${task.title}?`)) {
+        this.projectManager.deleteTaskFromProject(project.id, task.id);
+        this.projectManager.saveProject(project);
+        this.displayTasks(project);
+      }
+    });
+
+    taskElem.append(taskPrio);
+    taskElem.append(title);
+    taskElem.append(deleteTaskButton);
     if (task.status) {
-      // title.style.textDecoration = "line-through";
       taskElem.classList.add("task-completed");
     }
 
     // Task info div
-    const taskInfo = this.createTaskInfoElement(task);
+    const taskInfo = this.createTaskInfoElement(task, project);
     taskElem.addEventListener("click", () => {
       const state = taskInfo.style.display;
       if (state === "none") {
@@ -189,11 +245,10 @@ export default class Display {
     taskInfo.classList.add("task-info");
     taskInfo.style.display = "none";
 
-    // const list = document.createElement("ul");
     for (const field in task) {
       const taskInfoField = document.createElement("div");
       taskInfoField.classList.add("task-info-field");
-      // console.log(field, task[field]);
+      //
       // FIX: better check for field info is needed
       if (
         field !== "id" &&
@@ -204,23 +259,19 @@ export default class Display {
         task[field] !== undefined &&
         task[field] !== ""
       ) {
-        // const item = document.createElement("li");
         const label = document.createElement("label");
         label.innerText = field;
 
         const info = document.createElement("div");
         if (field === "dueDate") {
-          // taskInfoField.append(label, format(task[field], "do MMMM yyyy"));
           info.innerText = format(task[field], "do MMMM yyyy");
         } else {
           info.innerText = task[field];
         }
         taskInfoField.append(label, info);
-        // list.append(item);
         taskInfo.append(taskInfoField);
       }
     }
-
     return taskInfo;
   }
 
@@ -238,12 +289,29 @@ export default class Display {
       description: undefined,
       status: false,
     }; */
-    // const popUp = this.createPopUp();
-    // popUpContainer.append(popUp);
 
     const popUp = document.createElement("div");
     popUp.classList.add("popup");
     this.elements.taskList.append(popUp);
+
+    function closePopUp() {
+      popUp.style.display = "none";
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closePopUp();
+      }
+    });
+
+    const closeButton = document.createElement("button");
+    closeButton.innerText = "×";
+
+    closeButton.addEventListener("click", () => {
+      closePopUp();
+    });
+
+    popUp.append(closeButton);
 
     const form = document.createElement("form");
     form.classList.add("form-container");
@@ -257,20 +325,25 @@ export default class Display {
 
       let input;
 
-      if (field === "priority") {
-        input = document.createElement("select");
-        // for (const prio in Task.PRIORITIES) {
-        Task.PRIORITIES.forEach((priority) => {
-          const option = document.createElement("option");
-          option.value = priority;
-          option.innerText = priority;
-          input.append(option);
-        });
-      } else if (field === "description") {
-        input = document.createElement("textarea");
-      } else {
-        input = document.createElement("input");
-        input.setAttribute("type", fieldTypes[field] || "text");
+      switch (field) {
+        case "priority":
+          input = document.createElement("select");
+          Task.PRIORITIES.forEach((priority) => {
+            const option = document.createElement("option");
+            option.value = priority;
+            option.innerText = priority;
+            input.append(option);
+          });
+          break;
+        case "description":
+          input = document.createElement("textarea");
+
+          break;
+
+        default:
+          input = document.createElement("input");
+          input.setAttribute("type", fieldTypes[field] || "text");
+          break;
       }
       input.setAttribute("id", field);
       input.setAttribute("name", field);
@@ -303,7 +376,6 @@ export default class Display {
         title.value = titleTrimmed;
       } else {
         errorText.innerText += "Title should not be empty";
-        // title.focus();
       }
 
       if (errorText.innerText !== "") {
@@ -311,8 +383,6 @@ export default class Display {
         return false;
       }
 
-      //
-      // FIX: submit reloads the page, so data gets reset
       const taskData = {};
       for (const field of fields) {
         const inputField = document.getElementById(field);
@@ -326,43 +396,21 @@ export default class Display {
         }
       }
 
-      // project.addTask(taskData);
       this.projectManager.createTaskForProject(project.id, taskData);
-      // console.log(project.getTaskList());
       this.displayTasks(project);
     });
 
     form.append(sendFormButt);
-    // form.append(field);
-    // form.append(field);
 
     popUp.append(form);
-    // console.log(taskData);
 
     taskCreateButton.addEventListener("click", (e) => {
       e.preventDefault();
       popUp.style.display = "block";
-      // this.projectManager.
-      // this.showPopUp(popUp);
-      // this.projectManager.getProjectById(project.id).addTask(testData);
-      // this.displayTasks(project);
     });
 
     return taskCreateButton;
   }
-
-  // createPopUp() {
-  //   // const popUpContainer = document.createElement("div");
-  //   // popUpContainer.classList.add("popup-container");
-  //   // popUpContainer.append(popUp);
-  //
-  //   return popUp;
-  // }
-  //
-  // showPopUp(popUp) {
-  //   popUp.style.color = "red";
-  //   console.log("show");
-  // }
 
   initialShow() {
     // defaultProjectId is initialized as NULL, no preference yet

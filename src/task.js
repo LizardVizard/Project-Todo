@@ -88,4 +88,8 @@ export default class Task {
   test() {
     console.log(`Task titled ${this.title}`);
   }
+
+  changeStatus() {
+    return (this.status = !this.status);
+  }
 }
