@@ -74,6 +74,22 @@ export default class projectManager {
     }
   }
 
+  updateTaskForProject(projId, taskId, taskData) {
+    const project = this.#projects.get(projId);
+
+    if (project) {
+      const task = project.updateTask(taskId, taskData);
+      console.log(task);
+      if (task) {
+        this.saveProject(project);
+      } else {
+        console.log(
+          `Task failed to update. projId:${projId}, taskId:${taskId}, taskData:${taskData}`,
+        );
+      }
+    }
+  }
+
   deleteTaskFromProject(projId, taskId) {
     this.#projects.get(projId).deleteTask(taskId);
   }
@@ -113,7 +129,7 @@ export default class projectManager {
   loadProjects() {
     const projectIdListJSON = localStorage.getItem("project_ids");
     const projectIdList = JSON.parse(projectIdListJSON);
-    console.log(projectIdList);
+    // console.log(projectIdList);
 
     projectIdList.forEach((projId) => {
       const projJSON = localStorage.getItem(`project-${projId}`);

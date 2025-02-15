@@ -35,20 +35,21 @@ export default class Task {
     // this.#subTaskCounter = 0;
   }
 
-  // updateTask(taskData) {
-  //   const { title, description, priority, dueDate, status } = taskData;
-  //
-  //   // TODO: Validation, again, I'm not actually going to do this
-  //
-  //   // if (title !== undefined) task.title = title;
-  //   // if (description !== undefined) task.description = description;
-  //   // if (priority !== undefined) task.priority = priority;
-  //   // if (dueDate !== undefined) task.dueDate = dueDate;
-  //   // if (status !== undefined) task.status = status;
-  //   //
-  //   // return task;
-  //   // Object.assign
-  // }
+  update(title, description, dueDate, status, priority) {
+    // const { title, description, priority, dueDate, status } = taskData;
+
+    // TODO: actually, i don't need validation here, and instead
+    // write validation in the taskFactory instead, but for now will do
+
+    if (title !== undefined) this.title = title;
+    if (description !== undefined) this.description = description;
+    if (priority !== undefined) this.priority = priority;
+    if (dueDate !== undefined) this.dueDate = dueDate;
+    if (status !== undefined) this.status = status;
+    //
+    return this;
+    // Object.assign
+  }
   /* addSubTask(
     taskTitle,
     taskDesc,

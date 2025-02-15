@@ -7,14 +7,19 @@ const fieldTypes = {
   priority: "select",
 };
 
+const elements = {
+  projectList: document.getElementById("project-list"),
+  taskList: document.getElementById("task-list"),
+};
+
 const fields = Object.keys(new Task()).filter(
   (field) => field != "id" && field != "",
 );
 
 export default class Display {
-  constructor(projectManager, elements) {
+  constructor(projectManager) {
     this.projectManager = projectManager;
-    this.elements = elements;
+    // this.elements = elements;
   }
 
   createProjectElement(project) {
@@ -41,16 +46,11 @@ export default class Display {
     isDefaultProjectSpan.addEventListener("click", () => {
       this.projectManager.changeDefaultProject(project.id);
       this.displayProjects();
-      // this
     });
 
     const projectTitle = document.createElement("div");
     projectTitle.innerText = `${project.title}`;
     projElem.append(isDefaultProjectSpan, projectTitle);
-    // projElem.innerHTML = `
-    //     <span>Tasks:${project.id === defaultProject}</span>
-    //     <span>${project.title}</span>
-    //   `;
 
     const projDeleteButton = this.createProjectDeleteButton(project);
     projContainer.append(projElem);
@@ -60,7 +60,6 @@ export default class Display {
   }
 
   createProjectDeleteButton(project) {
-    // Create a button with event listener to delete a project
     const projDeleteButton = document.createElement("button");
     projDeleteButton.innerHTML = "X";
     projDeleteButton.addEventListener("click", () => {
@@ -108,30 +107,30 @@ export default class Display {
     const projects = this.projectManager.getProjects();
 
     // Reset projects list display
-    this.elements.projectList.innerHTML = "";
+    elements.projectList.innerHTML = "";
 
     // For each project in projectManager create an element
     // to show it in the sidebar
     projects.forEach((project) => {
       const projectElement = this.createProjectElement(project);
-      this.elements.projectList.append(projectElement);
+      elements.projectList.append(projectElement);
     });
 
     // Make a button for creating new project
     const newProjectElement = this.createProjectCreationElement();
-    this.elements.projectList.append(newProjectElement);
+    elements.projectList.append(newProjectElement);
   }
 
   displayTasks(project) {
-    this.elements.taskList.innerHTML = "";
+    elements.taskList.innerHTML = "";
 
     const tasks = project.getTaskList();
     tasks.forEach((task) => {
       const taskElem = this.createTaskElement(task, project);
-      this.elements.taskList.append(taskElem);
+      elements.taskList.append(taskElem);
     });
     const taskCreateButton = this.createTaskCreationElement(project);
-    this.elements.taskList.append(taskCreateButton);
+    elements.taskList.append(taskCreateButton);
   }
 
   createTaskElement(task, project) {
@@ -144,8 +143,8 @@ export default class Display {
 
     // console.log(isDate(task.dueDate));
     // console.log(task.dueData instanceof Date);
-    console.log(task.dueDate);
-    console.log(new Date(task.dueDate));
+    // console.log(task.dueDate);
+    // console.log(new Date(task.dueDate));
 
     // console.log(differenceInDays(task.dueDate, new Date()));
     if (task.dueDate !== null) {
@@ -163,7 +162,7 @@ export default class Display {
       }
     }
 
-    // Priority indicator
+    // Priority and status indicators
     const taskPrio = document.createElement("div");
     taskPrio.classList.add("task-priority");
     taskPrio.title = `Priority: ${task.priority}`;
@@ -171,13 +170,13 @@ export default class Display {
     const checkmark = document.createElement("span");
     checkmark.innerText = "✔";
     checkmark.classList.add("checkmark");
+    checkmark.style.display = "none";
 
     if (task.status) {
       checkmark.style.display = "block";
       taskElem.classList.remove("already-due");
       taskElem.classList.remove("soon-due");
-    } else {
-      checkmark.style.display = "none";
+      taskElem.classList.add("task-completed");
     }
 
     taskPrio.append(checkmark);
@@ -205,7 +204,31 @@ export default class Display {
     const title = document.createElement("span");
     title.innerText = task.title;
 
+    const updateTaskButton = document.createElement("button");
+    updateTaskButton.classList.add("update-button");
+    updateTaskButton.innerText = "Update task";
+    updateTaskButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const taskIdField = document.getElementById("id");
+      taskIdField.value = task.id;
+
+      for (const field of fields) {
+        const inputField = document.getElementById(field);
+        // console.log(inputField, inputField.value);
+        if (inputField) {
+          if (inputField.type === "checkbox") {
+            inputField.checked = task[field];
+          } else {
+            inputField.value = task[field];
+          }
+        }
+      }
+      this.openPopUp();
+    });
+
     const deleteTaskButton = document.createElement("button");
+    deleteTaskButton.classList.add("delete-button");
     deleteTaskButton.innerText = "Delete task";
     deleteTaskButton.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -218,12 +241,9 @@ export default class Display {
 
     taskElem.append(taskPrio);
     taskElem.append(title);
-    taskElem.append(deleteTaskButton);
-    if (task.status) {
-      taskElem.classList.add("task-completed");
-    }
+    taskElem.append(updateTaskButton, deleteTaskButton);
 
-    // Task info div
+    // Task info that is show on click
     const taskInfo = this.createTaskInfoElement(task, project);
     taskElem.addEventListener("click", () => {
       const state = taskInfo.style.display;
@@ -255,9 +275,7 @@ export default class Display {
         field !== "title" &&
         field !== "priority" &&
         field !== "status" &&
-        task[field] !== null &&
-        task[field] !== undefined &&
-        task[field] !== ""
+        task[field]
       ) {
         const label = document.createElement("label");
         label.innerText = field;
@@ -289,32 +307,50 @@ export default class Display {
       description: undefined,
       status: false,
     }; */
-
     const popUp = document.createElement("div");
+    popUp.id = "task-popup";
     popUp.classList.add("popup");
-    this.elements.taskList.append(popUp);
+    elements.taskList.append(popUp);
 
-    function closePopUp() {
-      popUp.style.display = "none";
-    }
+    // function closePopUp() {
+    //   popUp.style.display = "none";
+    // }
+    //
+    // function showPopUp() {
+    //   popUp.style.display = "block";
+    // }
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        closePopUp();
+        this.closePopUp();
       }
     });
+
+    const popUpTitleContainer = document.createElement("div");
+    popUpTitleContainer.classList.add("popup-info");
+
+    const popUpTitle = document.createElement("span");
+    popUpTitle.innerText = "Create a new task";
 
     const closeButton = document.createElement("button");
     closeButton.innerText = "×";
 
     closeButton.addEventListener("click", () => {
-      closePopUp();
+      this.closePopUp();
     });
 
-    popUp.append(closeButton);
+    popUpTitleContainer.append(popUpTitle, closeButton);
+    popUp.append(popUpTitleContainer);
 
     const form = document.createElement("form");
+    form.id = "create-task-form";
     form.classList.add("form-container");
+
+    const taskIdField = document.createElement("input");
+    taskIdField.setAttribute("type", "hidden");
+    taskIdField.setAttribute("id", "id");
+    taskIdField.setAttribute("name", "id");
+    form.append(taskIdField);
 
     for (const field of fields) {
       const fieldElem = document.createElement("div");
@@ -335,9 +371,9 @@ export default class Display {
             input.append(option);
           });
           break;
+
         case "description":
           input = document.createElement("textarea");
-
           break;
 
         default:
@@ -357,14 +393,49 @@ export default class Display {
       form.append(fieldElem);
     }
     const errorText = document.createElement("div");
+    errorText.id = "error-text";
     errorText.classList.add("error-text");
 
     form.append(errorText);
 
     const sendFormButt = document.createElement("button");
-    sendFormButt.innerText = "Create New Task";
+    sendFormButt.innerText = "Submit";
 
+    form.append(sendFormButt);
     form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (this.validateForm()) {
+        const taskId = document.getElementById("id").value;
+
+        const taskData = {};
+        for (const field of fields) {
+          const inputField = document.getElementById(field);
+          // console.log(inputField, inputField.value);
+          if (inputField) {
+            if (inputField.type === "checkbox") {
+              taskData[field] = inputField.checked;
+            } else {
+              taskData[field] = inputField.value;
+            }
+          }
+        }
+
+        if (taskId) {
+          this.projectManager.updateTaskForProject(
+            project.id,
+            taskId,
+            taskData,
+          );
+        } else {
+          this.projectManager.createTaskForProject(project.id, taskData);
+        }
+
+        this.displayTasks(project);
+      }
+    });
+    // const newTaskForm = this.createTaskForm("create-task-form");
+
+    /* form.addEventListener("submit", (e) => {
       e.preventDefault();
 
       errorText.innerText = "";
@@ -383,10 +454,13 @@ export default class Display {
         return false;
       }
 
+      // if ( new task ) {
+      // console.log(this);
+
       const taskData = {};
       for (const field of fields) {
         const inputField = document.getElementById(field);
-        console.log(inputField, inputField.value);
+        // console.log(inputField, inputField.value);
         if (inputField) {
           if (inputField.type === "checkbox") {
             taskData[field] = inputField.checked;
@@ -398,19 +472,52 @@ export default class Display {
 
       this.projectManager.createTaskForProject(project.id, taskData);
       this.displayTasks(project);
-    });
-
-    form.append(sendFormButt);
+    }); */
 
     popUp.append(form);
 
     taskCreateButton.addEventListener("click", (e) => {
       e.preventDefault();
-      popUp.style.display = "block";
+      form.reset();
+      this.openPopUp();
     });
 
     return taskCreateButton;
   }
+
+  validateForm() {
+    const errorText = document.getElementById("error-text");
+    errorText.innerText = "";
+    errorText.style.display = "none";
+
+    const title = document.getElementById("title");
+    const titleTrimmed = title.value.trim();
+    if (titleTrimmed) {
+      title.value = titleTrimmed;
+    } else {
+      errorText.innerText += "Title should not be empty";
+    }
+
+    if (errorText.innerText !== "") {
+      errorText.style.display = "block";
+      return false;
+    }
+    return true;
+  }
+
+  openPopUp() {
+    document.getElementById("task-popup").style.display = "flex";
+  }
+
+  closePopUp() {
+    document.getElementById("task-popup").style.display = "none";
+  }
+
+  // createTaskForm(id) {
+  //   return form;
+  // }
+
+  setupTaskEditing() {}
 
   initialShow() {
     // defaultProjectId is initialized as NULL, no preference yet

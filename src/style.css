@@ -53,6 +53,7 @@ body {
 .project:hover {
   background: #bbb;
 }
+
 .project-create > form {
   display: flex;
   flex: 1;
@@ -63,7 +64,8 @@ body {
   width: 100%;
 }
 
-.project-create button {
+.project-create button,
+.update-button {
   vertical-align: middle;
   width: 80px;
   height: 30px;
@@ -80,12 +82,14 @@ body {
     color 0.2s;
 }
 
-.project-create button:hover {
+.project-create button:hover,
+.update-button:hover {
   color: white;
   background-color: lightblue;
 }
 
-.project-container button {
+.project-container button,
+.delete-button {
   vertical-align: middle;
   width: 50px;
   height: 30px;
@@ -102,38 +106,23 @@ body {
     color 0.2s;
 }
 
-.project-container button:hover {
+.project-container button:hover,
+.delete-button:hover {
   background: #cc0000;
   color: white;
 }
 
+.update-button,
+.delete-button {
+  width: 150px;
+  font-size: 0.9rem;
+  font-weight: 300;
+}
 .checkmark {
   display: none;
   font-size: 1.2rem;
   text-align: center;
   color: black;
-}
-
-.task > button {
-  vertical-align: middle;
-  width: 150px;
-  height: 30px;
-  background-color: white;
-  border-width: 1px;
-  color: #d9534f;
-  font-size: 0.9rem;
-  font-weight: 300;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 5px;
-  transition:
-    background 0.2s,
-    color 0.2s;
-}
-
-.task > button:hover {
-  background: #cc0000;
-  color: white;
 }
 
 .task > span {
@@ -189,7 +178,9 @@ body {
 }
 .task.already-due {
   /* background-color: rgba(0, 0, 0, 0.5); */
+  color: white;
   background-color: #777;
+  background-color: #444;
 }
 
 .task {
@@ -271,8 +262,17 @@ body {
   position: absolute;
   left: 0;
   right: 0;
+  align-items: center;
 }
-.popup > button {
+
+.popup-info > span {
+  position: absolute;
+  top: 10px;
+  left: 45%;
+  font-weight: bold;
+}
+
+.popup-info > button {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -281,11 +281,14 @@ body {
   font-size: 20px;
   cursor: pointer;
 }
+
 .form-container {
+  width: 80%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .form-field {
   width: 80%;
   display: flex;
