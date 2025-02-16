@@ -23,7 +23,22 @@ export default class projectManager {
       this.saveProject(project);
       return this.#counter;
     } else {
-      console.log("Project title failed validation");
+      console.log("Project title failed validation during creation");
+      return;
+    }
+  }
+
+  renameProject(projId, projTitle) {
+    const validatedTitle = Validator.validateProjectTitle(projTitle);
+
+    if (typeof validatedTitle === "string") {
+      const project = this.getProjectById(projId);
+
+      project.rename(validatedTitle);
+      this.saveProject(project);
+      return this.#counter;
+    } else {
+      console.log("Project title failed validation during rename");
       return;
     }
   }
@@ -79,7 +94,6 @@ export default class projectManager {
 
     if (project) {
       const task = project.updateTask(taskId, taskData);
-      console.log(task);
       if (task) {
         this.saveProject(project);
       } else {

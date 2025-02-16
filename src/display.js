@@ -52,15 +52,25 @@ export default class Display {
     projectTitle.innerText = `${project.title}`;
     projElem.append(isDefaultProjectSpan, projectTitle);
 
+    const projectButtonsContainer = document.createElement("div");
+    projectButtonsContainer.classList.add("project-butt-container");
+
+    const projectRename = this.createProjectRenameButton(project);
+    // projectRename.classList.add("project-butt-rename");
+    // projectRename.innerText = "Rename";
+
     const projDeleteButton = this.createProjectDeleteButton(project);
     projContainer.append(projElem);
-    projContainer.append(projDeleteButton);
 
+    projectButtonsContainer.append(projectRename, projDeleteButton);
+
+    projContainer.append(projectButtonsContainer);
     return projContainer;
   }
 
   createProjectDeleteButton(project) {
     const projDeleteButton = document.createElement("button");
+    projDeleteButton.classList.add("project-butt-delete");
     projDeleteButton.innerHTML = "X";
     projDeleteButton.addEventListener("click", () => {
       if (confirm(`Are you sure you want to delete ${project.title} ?`)) {
@@ -70,6 +80,22 @@ export default class Display {
     });
     return projDeleteButton;
   }
+  createProjectRenameButton(project) {
+    const projRenameButton = document.createElement("button");
+    projRenameButton.classList.add("project-butt-rename");
+    projRenameButton.innerHTML = "Rename";
+    projRenameButton.addEventListener("click", () => {
+      const name = prompt(`How to rename project ${project.title} ?`);
+      if (name.trim()) {
+        this.projectManager.renameProject(project.id, name);
+        // console.log("Renaming to ", name);
+        this.displayProjects();
+      } else {
+        alert("Name failed validation");
+      }
+    });
+    return projRenameButton;
+  }
 
   createProjectCreationElement() {
     const newProj = document.createElement("div");
@@ -78,6 +104,7 @@ export default class Display {
     const form = document.createElement("form");
     const input = document.createElement("input");
     const butt = document.createElement("button");
+    butt.classList.add("project-butt-create");
     butt.innerHTML = "Create";
 
     form.addEventListener("submit", (e) => {
@@ -92,6 +119,7 @@ export default class Display {
         this.displayProjects(projectId);
       } else {
         console.log(`project failed to create`);
+        alert("Project title failed validation");
       }
     });
 
@@ -346,6 +374,7 @@ export default class Display {
     form.id = "create-task-form";
     form.classList.add("form-container");
 
+    // Hidden field for updating a task instead of creating
     const taskIdField = document.createElement("input");
     taskIdField.setAttribute("type", "hidden");
     taskIdField.setAttribute("id", "id");
@@ -410,7 +439,6 @@ export default class Display {
         const taskData = {};
         for (const field of fields) {
           const inputField = document.getElementById(field);
-          // console.log(inputField, inputField.value);
           if (inputField) {
             if (inputField.type === "checkbox") {
               taskData[field] = inputField.checked;
@@ -433,46 +461,6 @@ export default class Display {
         this.displayTasks(project);
       }
     });
-    // const newTaskForm = this.createTaskForm("create-task-form");
-
-    /* form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      errorText.innerText = "";
-      errorText.style.display = "none";
-
-      const title = document.getElementById("title");
-      const titleTrimmed = title.value.trim();
-      if (titleTrimmed) {
-        title.value = titleTrimmed;
-      } else {
-        errorText.innerText += "Title should not be empty";
-      }
-
-      if (errorText.innerText !== "") {
-        errorText.style.display = "block";
-        return false;
-      }
-
-      // if ( new task ) {
-      // console.log(this);
-
-      const taskData = {};
-      for (const field of fields) {
-        const inputField = document.getElementById(field);
-        // console.log(inputField, inputField.value);
-        if (inputField) {
-          if (inputField.type === "checkbox") {
-            taskData[field] = inputField.checked;
-          } else {
-            taskData[field] = inputField.value;
-          }
-        }
-      }
-
-      this.projectManager.createTaskForProject(project.id, taskData);
-      this.displayTasks(project);
-    }); */
 
     popUp.append(form);
 

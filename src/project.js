@@ -33,4 +33,8 @@ export default class Project {
   getTaskList() {
     return this.taskList;
   }
+
+  rename(title) {
+    this.title = title;
+  }
 }
