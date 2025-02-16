@@ -129,13 +129,20 @@ export default class projectManager {
   loadProjects() {
     const projectIdListJSON = localStorage.getItem("project_ids");
     const projectIdList = JSON.parse(projectIdListJSON);
-    // console.log(projectIdList);
 
-    projectIdList.forEach((projId) => {
-      const projJSON = localStorage.getItem(`project-${projId}`);
-      const projData = JSON.parse(projJSON);
+    // If projects found load them, otherwise create a default project
+    if (projectIdList) {
+      projectIdList.forEach((projId) => {
+        const projJSON = localStorage.getItem(`project-${projId}`);
+        const projData = JSON.parse(projJSON);
 
-      this.createProjectFromJSON(projData);
-    });
+        this.createProjectFromJSON(projData);
+      });
+    } else {
+      const projId = this.createProject("Default project");
+
+      this.createTaskForProject(projId, { title: "Create some tasks" });
+      // }
+    }
   }
 }
